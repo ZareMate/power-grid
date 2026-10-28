@@ -1,0 +1,49 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+group = 'dev.zaremate.powergridcc'
+version = '1.1.0'
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+neoForge {
+    version = '21.1.249'
+    mods { powergrid_cc { sourceSet sourceSets.main } }
+}
+repositories {
+    mavenCentral()
+    maven { url = 'https://api.modrinth.com/maven'; content { includeGroup 'maven.modrinth' } }
+}
+configurations { createBundle }
+def extractCreateLibraries = tasks.register('extractCreateLibraries', Sync) {
+    from({ zipTree(configurations.createBundle.singleFile) }) {
+        include 'META-INF/jarjar/*.jar'
+        eachFile { path = name }
+        includeEmptyDirs = false
+    }
+    into layout.buildDirectory.dir('create-libraries')
+}
+dependencies {
+    implementation('maven.modrinth:eWiBLJ9R:jCkPHjmP') { transitive = false }
+    implementation('maven.modrinth:cc-tweaked:8XEJbAee') { transitive = false }
+    implementation('maven.modrinth:create:UjX6dr61') { transitive = false }
+    createBundle('maven.modrinth:create:UjX6dr61') { transitive = false }
+    implementation files(fileTree(layout.buildDirectory.dir('create-libraries')) { include '*.jar' }).builtBy(extractCreateLibraries)
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+test {
+    useJUnitPlatform()
+    outputs.upToDateWhen { false }
+    workingDir layout.buildDirectory.dir('test-work').get().asFile
+    doFirst { workingDir.mkdirs() }
+}
+sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
+sourceSets.test.runtimeClasspath += sourceSets.main.runtimeClasspath
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.named('jar') {
+    from 'LICENSE'
+    manifest { attributes 'Implementation-Version': project.version }
+}

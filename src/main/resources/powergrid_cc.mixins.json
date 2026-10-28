@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.zaremate.powergridcc.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["PunchCardReaderMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

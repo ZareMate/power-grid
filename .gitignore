@@ -1,0 +1,7 @@
+.gradle/
+build/
+libs/
+upstream/
+pinout-upstream/
+.idea/
+*.iml
